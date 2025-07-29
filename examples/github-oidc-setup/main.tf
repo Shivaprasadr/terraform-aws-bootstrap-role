@@ -24,9 +24,10 @@ provider "aws" {
 module "iam_bootstrap" {
   source = "../../modules/iam-bootstrap"
 
-  aws_account_id = var.aws_account_id
-  project_name   = var.project_name
-  environment    = var.environment
+  aws_account_id   = var.aws_account_id
+  project_name     = var.project_name
+  environment      = var.environment
+  role_name_prefix = var.role_name_prefix
 
   # GitHub OIDC Configuration - PRIMARY FOCUS
   github_org           = var.github_org
@@ -38,8 +39,8 @@ module "iam_bootstrap" {
   trusted_aws_principals = var.trusted_aws_principals
 
   # Policy Configuration
-  terraform_custom_policy_json         = var.terraform_custom_policy_json
-  terraform_deployment_role_policies   = var.terraform_deployment_role_policies
+  custom_policy_json         = var.custom_policy_json
+  deployment_role_policies   = var.deployment_role_policies
 
   # State bucket configuration
   create_state_bucket = var.create_state_bucket

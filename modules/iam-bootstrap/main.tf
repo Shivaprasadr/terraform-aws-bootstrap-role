@@ -36,15 +36,15 @@ resource "aws_iam_openid_connect_provider" "github" {
 }
 
 # TerraformDeploymentRole - The role with actual permissions
-resource "aws_iam_role" "terraform_deployment_role" {
-  name               = "${var.project_name}-TerraformDeploymentRole-${var.environment}"
+resource "aws_iam_role" "deployment_role" {
+  name               = "${var.project_name}-${var.role_name_prefix}DeploymentRole-${var.environment}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${var.aws_account_id}:role/${var.project_name}-TerraformExecutorRole-${var.environment}"
+          AWS = "arn:aws:iam::${var.aws_account_id}:role/${var.project_name}-${var.role_name_prefix}ExecutorRole-${var.environment}"
         }
         Action = "sts:AssumeRole"
         Condition = {
@@ -59,36 +59,36 @@ resource "aws_iam_role" "terraform_deployment_role" {
   max_session_duration = var.session_duration
 
   tags = merge(local.common_tags, {
-    Name = "${var.project_name}-TerraformDeploymentRole-${var.environment}"
+    Name = "${var.project_name}-${var.role_name_prefix}DeploymentRole-${var.environment}"
     Type = "DeploymentRole"
   })
 }
 
-# # Attach AdminAccess policy to TerraformDeploymentRole (if no custom policies specified)
-# resource "aws_iam_role_policy_attachment" "terraform_deployment_admin" {
-#   count      = length(var.terraform_deployment_role_policies) == 0 ? 1 : 0
-#   role       = aws_iam_role.terraform_deployment_role.name
+# # Attach AdminAccess policy to DeploymentRole (if no custom policies specified)
+# resource "aws_iam_role_policy_attachment" "deployment_admin" {
+#   count      = length(var.deployment_role_policies) == 0 ? 1 : 0
+#   role       = aws_iam_role.deployment_role.name
 #   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 # }
 
-# Custom inline policy for TerraformDeploymentRole (recommended approach)
-resource "aws_iam_role_policy" "terraform_deployment_custom" {
-  count = var.terraform_custom_policy_json != "" ? 1 : 0
-  name  = "${var.project_name}-TerraformDeploymentPolicy-${var.environment}"
-  role  = aws_iam_role.terraform_deployment_role.id
-  policy = var.terraform_custom_policy_json
+# Custom inline policy for DeploymentRole (recommended approach)
+resource "aws_iam_role_policy" "deployment_custom" {
+  count = var.custom_policy_json != "" ? 1 : 0
+  name  = "${var.project_name}-${var.role_name_prefix}DeploymentPolicy-${var.environment}"
+  role  = aws_iam_role.deployment_role.id
+  policy = var.custom_policy_json
 }
 
-# Attach additional managed policies to TerraformDeploymentRole if specified
-resource "aws_iam_role_policy_attachment" "terraform_deployment_additional" {
-  count      = length(var.terraform_deployment_role_policies)
-  role       = aws_iam_role.terraform_deployment_role.name
-  policy_arn = var.terraform_deployment_role_policies[count.index]
+# Attach additional managed policies to DeploymentRole if specified
+resource "aws_iam_role_policy_attachment" "deployment_additional" {
+  count      = length(var.deployment_role_policies)
+  role       = aws_iam_role.deployment_role.name
+  policy_arn = var.deployment_role_policies[count.index]
 }
 
-# TerraformExecutorRole - The role that can be assumed from GitHub or personal machine
-resource "aws_iam_role" "terraform_executor_role" {
-  name = "${var.project_name}-TerraformExecutorRole-${var.environment}"
+# ExecutorRole - The role that can be assumed from GitHub or personal machine
+resource "aws_iam_role" "executor_role" {
+  name = "${var.project_name}-${var.role_name_prefix}ExecutorRole-${var.environment}"
   
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -128,15 +128,15 @@ resource "aws_iam_role" "terraform_executor_role" {
   max_session_duration = var.session_duration
 
   tags = merge(local.common_tags, {
-    Name = "${var.project_name}-TerraformExecutorRole-${var.environment}"
+    Name = "${var.project_name}-${var.role_name_prefix}ExecutorRole-${var.environment}"
     Type = "ExecutorRole"
   })
 }
 
-# IAM policy for TerraformExecutorRole - only allows assuming TerraformDeploymentRole
-resource "aws_iam_role_policy" "terraform_executor_policy" {
-  name = "${var.project_name}-TerraformExecutorPolicy-${var.environment}"
-  role = aws_iam_role.terraform_executor_role.id
+# IAM policy for ExecutorRole - only allows assuming DeploymentRole
+resource "aws_iam_role_policy" "executor_policy" {
+  name = "${var.project_name}-${var.role_name_prefix}ExecutorPolicy-${var.environment}"
+  role = aws_iam_role.executor_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -147,7 +147,7 @@ resource "aws_iam_role_policy" "terraform_executor_policy" {
           "sts:AssumeRole"
         ]
         Resource = [
-          aws_iam_role.terraform_deployment_role.arn
+          aws_iam_role.deployment_role.arn
         ]
       },
       {

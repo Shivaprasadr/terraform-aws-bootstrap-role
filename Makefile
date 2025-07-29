@@ -36,14 +36,14 @@ help:
 	@echo ""
 	@echo "🎯 RECOMMENDED: Use automated bootstrap scripts:"
 ifeq ($(OS_TYPE),windows)
-	@echo "   Windows: .\\bootstrap-windows.ps1 -AccountId \"123456789012\" -ProjectName \"my-project\""
+	@echo "   Windows: .\\scripts\\bootstrap-windows.ps1 -AccountId \"123456789012\" -ProjectName \"my-project\""
 else
-	@echo "   Linux/macOS: ./bootstrap-linux.sh -a 123456789012 -p my-project"
+	@echo "   Linux/macOS: ./scripts/bootstrap-linux.sh -a 123456789012 -p my-project"
 endif
 	@echo ""
 	@echo "Available make targets:"
 	@echo "  bootstrap      - Run the appropriate bootstrap script for your OS"
-	@echo "  setup-single   - Deploy roles for single account (GitHub + Local)"
+	@echo "  setup-single   - Deploy roles for GitHub and local access"
 	@echo "  setup-github   - Deploy roles for GitHub OIDC only"
 	@echo "  clean          - Clean up all created resources"
 	@echo "  format         - Format all Terraform files"
@@ -58,10 +58,10 @@ bootstrap:
 	@echo "🔧 Detecting operating system: $(OS_TYPE)"
 ifeq ($(OS_TYPE),windows)
 	@echo "📝 For Windows, please run:"
-	@echo "   .\\bootstrap-windows.ps1 -AccountId \"YOUR-ACCOUNT-ID\" -ProjectName \"YOUR-PROJECT\""
+	@echo "   .\\scripts\\bootstrap-windows.ps1 -AccountId \"YOUR-ACCOUNT-ID\" -ProjectName \"YOUR-PROJECT\""
 	@echo ""
 	@echo "Example:"
-	@echo "   .\\bootstrap-windows.ps1 -AccountId \"123456789012\" -ProjectName \"my-project\" -Environment \"dev\""
+	@echo "   .\\scripts\\bootstrap-windows.ps1 -AccountId \"123456789012\" -ProjectName \"my-project\" -Environment \"dev\""
 else
 	@echo "🚀 Running Linux/macOS bootstrap script..."
 	@echo "Usage: make bootstrap ACCOUNT_ID=123456789012 PROJECT_NAME=my-project [ENVIRONMENT=dev]"
@@ -71,22 +71,22 @@ else
 		echo "   make bootstrap ACCOUNT_ID=123456789012 PROJECT_NAME=my-project"; \
 		exit 1; \
 	fi
-	@./bootstrap-linux.sh -a "$(ACCOUNT_ID)" -p "$(PROJECT_NAME)" -e "$(or $(ENVIRONMENT),dev)"
+	@./scripts/bootstrap-linux.sh -a "$(ACCOUNT_ID)" -p "$(PROJECT_NAME)" -e "$(or $(ENVIRONMENT),dev)"
 endif
 
-# Setup for single account (supports both GitHub Actions and local development)
+# Setup for GitHub and local access (supports both GitHub Actions and local development)
 setup-single:
-	@echo "🔧 Setting up IAM roles for single account deployment..."
-	@echo "📁 Working directory: examples/single-account-setup"
-	@if [ ! -f examples/single-account-setup/terraform.tfvars ]; then \
+	@echo "🔧 Setting up IAM roles for GitHub and local access deployment..."
+	@echo "📁 Working directory: examples/github-and-local-access"
+	@if [ ! -f examples/github-and-local-access/terraform.tfvars ]; then \
 		echo "❌ terraform.tfvars not found!"; \
-		echo "📝 Please configure: examples/single-account-setup/terraform.tfvars"; \
+		echo "📝 Please configure: examples/github-and-local-access/terraform.tfvars"; \
 		exit 1; \
 	fi
-	@cd examples/single-account-setup && terraform init
-	@cd examples/single-account-setup && terraform plan
+	@cd examples/github-and-local-access && terraform init
+	@cd examples/github-and-local-access && terraform plan
 	@echo "🚀 Deploying roles..."
-	@cd examples/single-account-setup && terraform apply -auto-approve
+	@cd examples/github-and-local-access && terraform apply -auto-approve
 	@echo "✅ Setup complete! Check the output above for next steps."
 
 # Setup for GitHub OIDC only
@@ -108,11 +108,11 @@ setup-github:
 clean:
 	@echo "🧹 Cleaning up resources..."
 	@echo "Choose which setup to clean:"
-	@echo "1) Single account setup"
+	@echo "1) GitHub and local access setup"
 	@echo "2) GitHub OIDC setup"
 	@read -p "Enter choice (1 or 2): " choice; \
 	case $$choice in \
-		1) cd examples/single-account-setup && terraform destroy ;; \
+		1) cd examples/github-and-local-access && terraform destroy ;; \
 		2) cd examples/github-oidc-setup && terraform destroy ;; \
 		*) echo "❌ Invalid choice" && exit 1 ;; \
 	esac
@@ -128,7 +128,7 @@ format:
 validate:
 	@echo "🔍 Validating Terraform configuration..."
 	@cd modules/iam-bootstrap && terraform init -backend=false && terraform validate
-	@cd examples/single-account-setup && terraform init -backend=false && terraform validate
+	@cd examples/github-and-local-access && terraform init -backend=false && terraform validate
 	@cd examples/github-oidc-setup && terraform init -backend=false && terraform validate
 	@echo "✅ Validation complete!"
 

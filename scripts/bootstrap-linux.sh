@@ -107,13 +107,13 @@ fi
 # Ask which example to use
 echo ""
 echo "📁 Available setup examples:"
-echo "1. single-account-setup (Local development + optional GitHub)"
+echo "1. github-and-local-access (Local development + optional GitHub)"
 echo "2. github-oidc-setup (GitHub Actions focused)"
 
 while true; do
     read -p "Select setup type (1 or 2): " choice
     case $choice in
-        1) EXAMPLE_DIR="examples/single-account-setup"; break ;;
+        1) EXAMPLE_DIR="examples/github-and-local-access"; break ;;
         2) EXAMPLE_DIR="examples/github-oidc-setup"; break ;;
         *) echo "Please enter 1 or 2" ;;
     esac
@@ -261,7 +261,7 @@ echo "🎉 Bootstrap process complete!"
 setup_single_account() {
     print_header "Single Account Setup (GitHub + Local)"
     
-    local config_dir="examples/single-account-setup"
+    local config_dir="examples/github-and-local-access"
     local config_file="$config_dir/terraform.tfvars.local"
     
     if [ -f "$config_file" ]; then
@@ -460,8 +460,8 @@ cleanup_resources() {
     
     case $cleanup_option in
         1)
-            if [ -f "examples/single-account-setup/terraform.tfvars.local" ]; then
-                cd "examples/single-account-setup"
+            if [ -f "examples/github-and-local-access/terraform.tfvars.local" ]; then
+                cd "examples/github-and-local-access"
                 print_warning "This will destroy all created IAM roles and resources"
                 read -p "Are you sure? (y/N): " confirm
                 if [[ $confirm =~ ^[Yy]$ ]]; then

@@ -67,14 +67,14 @@ if (!(Get-Command terraform -ErrorAction SilentlyContinue)) {
 
 # Ask which example to use
 Write-Host "`nAvailable setup examples:" -ForegroundColor Cyan
-Write-Host "1. single-account-setup (Local development + optional GitHub)" -ForegroundColor White
+Write-Host "1. github-and-local-access (Local development + optional GitHub)" -ForegroundColor White
 Write-Host "2. github-oidc-setup (GitHub Actions focused)" -ForegroundColor White
 
 do {
     $choice = Read-Host "Select setup type (1 or 2)"
 } while ($choice -ne "1" -and $choice -ne "2")
 
-$exampleDir = if ($choice -eq "1") { "examples/single-account-setup" } else { "examples/github-oidc-setup" }
+$exampleDir = if ($choice -eq "1") { "examples/github-and-local-access" } else { "examples/github-oidc-setup" }
 Write-Host "Using: $exampleDir" -ForegroundColor Green
 
 # Navigate to the selected example

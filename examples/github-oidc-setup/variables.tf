@@ -1,5 +1,14 @@
-variable "aws_region" {
-  description = "AWS region to deploy resources"
+variable "aws_region"variable "environment" {
+  description = "Environment name (e.g., dev, staging, prod)"
+  type        = string
+  default     = "prod"
+}
+
+variable "role_name_prefix" {
+  description = "Prefix for IAM role names (e.g., 'Terraform', 'CI', 'Deploy')"
+  type        = string
+  default     = "Terraform"
+} description = "AWS region to deploy resources"
   type        = string
   default     = "us-east-1"
 }
@@ -67,19 +76,19 @@ variable "tags" {
   default     = {}
 }
 
-variable "terraform_custom_policy_json" {
-  description = "Custom IAM policy JSON for the Terraform deployment role (optional)"
+variable "custom_policy_json" {
+  description = "Custom IAM policy JSON for the deployment role (optional)"
   type        = string
   default     = ""
   
   validation {
-    condition = var.terraform_custom_policy_json == "" || can(jsondecode(var.terraform_custom_policy_json))
-    error_message = "The terraform_custom_policy_json must be valid JSON when provided."
+    condition = var.custom_policy_json == "" || can(jsondecode(var.custom_policy_json))
+    error_message = "The custom_policy_json must be valid JSON when provided."
   }
 }
 
-variable "terraform_deployment_role_policies" {
-  description = "List of managed policy ARNs to attach to the Terraform deployment role"
+variable "deployment_role_policies" {
+  description = "List of managed policy ARNs to attach to the deployment role"
   type        = list(string)
   default     = []
 }

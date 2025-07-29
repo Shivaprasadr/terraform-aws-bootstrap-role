@@ -20,9 +20,15 @@ variable "project_name" {
 }
 
 variable "environment" {
-  description = "Environment name (dev, staging, prod, etc.)"
+  description = "Environment name (e.g., dev, staging, prod)"
   type        = string
   default     = "dev"
+}
+
+variable "role_name_prefix" {
+  description = "Prefix for IAM role names (e.g., 'Terraform', 'CI', 'Deploy')"
+  type        = string
+  default     = "Terraform"
 }
 
 variable "github_org" {
@@ -50,19 +56,19 @@ variable "enable_github_oidc" {
 }
 
 variable "trusted_aws_principals" {
-  description = "List of AWS principals (users/roles) that can assume the TerraformExecutorRole"
+  description = "List of AWS principals (users/roles) that can assume the ExecutorRole"
   type        = list(string)
   default     = []
 }
 
-variable "terraform_custom_policy_json" {
-  description = "Custom inline policy JSON for TerraformDeploymentRole. If provided, this will be used instead of AdministratorAccess."
+variable "custom_policy_json" {
+  description = "Custom inline policy JSON for DeploymentRole. If provided, this will be used instead of AdministratorAccess."
   type        = string
   default     = ""
 }
 
-variable "terraform_deployment_role_policies" {
-  description = "List of managed IAM policy ARNs to attach to TerraformDeploymentRole"
+variable "deployment_role_policies" {
+  description = "List of managed IAM policy ARNs to attach to DeploymentRole"
   type        = list(string)
   default     = []
 }

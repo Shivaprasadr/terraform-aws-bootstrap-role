@@ -1,21 +1,21 @@
-output "terraform_deployment_role_arn" {
-  description = "ARN of the TerraformDeploymentRole"
-  value       = aws_iam_role.terraform_deployment_role.arn
+output "deployment_role_arn" {
+  description = "ARN of the DeploymentRole"
+  value       = aws_iam_role.deployment_role.arn
 }
 
-output "terraform_deployment_role_name" {
-  description = "Name of the TerraformDeploymentRole"
-  value       = aws_iam_role.terraform_deployment_role.name
+output "deployment_role_name" {
+  description = "Name of the DeploymentRole"
+  value       = aws_iam_role.deployment_role.name
 }
 
-output "terraform_executor_role_arn" {
-  description = "ARN of the TerraformExecutorRole"
-  value       = aws_iam_role.terraform_executor_role.arn
+output "executor_role_arn" {
+  description = "ARN of the ExecutorRole"
+  value       = aws_iam_role.executor_role.arn
 }
 
-output "terraform_executor_role_name" {
-  description = "Name of the TerraformExecutorRole"
-  value       = aws_iam_role.terraform_executor_role.name
+output "executor_role_name" {
+  description = "Name of the ExecutorRole"
+  value       = aws_iam_role.executor_role.name
 }
 
 output "github_oidc_provider_arn" {
@@ -36,18 +36,39 @@ output "aws_region" {
 output "github_actions_example" {
   description = "Example GitHub Actions workflow configuration"
   value = local.github_oidc_enabled ? {
-    role_to_assume = aws_iam_role.terraform_executor_role.arn
+    role_to_assume = aws_iam_role.executor_role.arn
     aws_region     = data.aws_region.current.name
-    deployment_role = aws_iam_role.terraform_deployment_role.arn
+    deployment_role = aws_iam_role.deployment_role.arn
   } : null
 }
 
 output "local_aws_cli_example" {
   description = "Example AWS CLI commands for local development"
   value = {
-    assume_executor_role = "aws sts assume-role --role-arn ${aws_iam_role.terraform_executor_role.arn} --role-session-name terraform-session"
-    assume_deployment_role = "aws sts assume-role --role-arn ${aws_iam_role.terraform_deployment_role.arn} --role-session-name terraform-deployment"
+    assume_executor_role = "aws sts assume-role --role-arn ${aws_iam_role.executor_role.arn} --role-session-name terraform-session"
+    assume_deployment_role = "aws sts assume-role --role-arn ${aws_iam_role.deployment_role.arn} --role-session-name terraform-deployment"
   }
+}
+
+# Backward compatibility outputs (deprecated - use deployment_role_* and executor_role_* instead)
+output "terraform_deployment_role_arn" {
+  description = "ARN of the DeploymentRole (deprecated - use deployment_role_arn)"
+  value       = aws_iam_role.deployment_role.arn
+}
+
+output "terraform_deployment_role_name" {
+  description = "Name of the DeploymentRole (deprecated - use deployment_role_name)"
+  value       = aws_iam_role.deployment_role.name
+}
+
+output "terraform_executor_role_arn" {
+  description = "ARN of the ExecutorRole (deprecated - use executor_role_arn)"
+  value       = aws_iam_role.executor_role.arn
+}
+
+output "terraform_executor_role_name" {
+  description = "Name of the ExecutorRole (deprecated - use executor_role_name)"
+  value       = aws_iam_role.executor_role.name
 }
 
 output "terraform_state_bucket_name" {

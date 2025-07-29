@@ -82,17 +82,6 @@ output "executor_role_arn" {
   value       = module.iam_bootstrap.executor_role_arn
 }
 
-# Backward compatibility outputs
-output "terraform_deployment_role_arn" {
-  description = "ARN of the DeploymentRole (deprecated - use deployment_role_arn)"
-  value       = module.iam_bootstrap.deployment_role_arn
-}
-
-output "terraform_executor_role_arn" {
-  description = "ARN of the ExecutorRole (deprecated - use executor_role_arn)"
-  value       = module.iam_bootstrap.executor_role_arn
-}
-
 output "github_oidc_provider_arn" {
   description = "ARN of the GitHub OIDC provider"
   value       = module.iam_bootstrap.github_oidc_provider_arn
@@ -121,4 +110,15 @@ output "terraform_dynamodb_table_name" {
 output "backend_configuration" {
   description = "Backend configuration for using the created state bucket"
   value       = module.iam_bootstrap.backend_configuration
+}
+
+# Backward compatibility outputs
+output "terraform_deployment_role_arn" {
+  description = "ARN of the DeploymentRole (deprecated - use deployment_role_arn)"
+  value       = module.iam_bootstrap.deployment_role_arn
+}
+
+output "terraform_executor_role_arn" {
+  description = "ARN of the ExecutorRole (deprecated - use executor_role_arn)"
+  value       = module.iam_bootstrap.executor_role_arn
 }
