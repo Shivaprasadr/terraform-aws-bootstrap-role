@@ -1,22 +1,51 @@
 # Terraform AWS Bootstrap Roles
 
-🚀 **Secure, reusable IAM role automation for AWS Terraform deployments**
+🚀 **Secure, parameterized IAM role automation for AWS Terraform deployments**
 
-This module creates IAM roles that enable secure Terraform deployments from:
+This module creates flexible IAM roles that enable secure Terraform deploy    └── github-and-local-access/     # GitHub + Local developmentents from:
 - **GitHub Actions** (via OIDC - no stored credentials!)
-- **Local development** (via role assumption)
+- **Local ## 🎯 Quick Links
+
+- **📱 New user?** → Run `.\scripts\bootstrap-windows.ps1` or `./scripts/bootstrap-linux.sh` to get started
+- **⚙️ Configuration help?** → Check the `terraform.tfvars` examples in each example folder
+- **🔒 Security questions?** → Custom policies are in the terraform.tfvars files
+- **❓ Issues?** → Check the troubleshooting section abovepment** (via role assumption)
+- **Other CI/CD systems** (via simple role assumption)
 
 ## 🏗️ Architecture
 
 ```
-GitHub Actions / Local Machine
+GitHub Actions / Local Machine / CI/CD
         ↓ (OIDC/STS authentication)
-TerraformExecutorRole (Limited permissions)
+ExecutorRole (Limited permissions)
         ↓ (assume role)
-TerraformDeploymentRole (Custom permissions)
+DeploymentRole (Custom permissions)
         ↓ (execute)
 AWS Resources
 ```
+
+## 🔧 Flexible Role Naming
+
+The module now supports **parameterized role names** instead of hardcoded "Terraform" prefixes:
+
+```hcl
+# Old naming (fixed):
+# my-project-TerraformExecutorRole-dev
+# my-project-TerraformDeploymentRole-dev
+
+# New naming (configurable):
+role_name_prefix = "Deploy"    # my-project-DeployExecutorRole-dev
+role_name_prefix = "CI"        # my-project-CIExecutorRole-dev  
+role_name_prefix = "App"       # my-project-AppExecutorRole-dev
+```
+
+## 📚 Examples
+
+Three ready-to-use examples are provided:
+
+1. **[GitHub OIDC Setup](examples/github-oidc-setup/)** - For GitHub Actions integration
+2. **[GitHub and Local Access](examples/github-and-local-access/)** - Combined GitHub + local access
+3. **[Simple Role Setup](examples/simple-role-setup/)** - Basic roles without GitHub OIDC
 
 ## 🚀 Quick Start
 
@@ -25,13 +54,13 @@ AWS Resources
 **For Windows users:**
 ```powershell
 # Run the bootstrap script
-.\bootstrap-windows.ps1 -AccountId "123456789012" -ProjectName "my-project" -Environment "dev"
+.\scripts\bootstrap-windows.ps1 -AccountId "123456789012" -ProjectName "my-project" -Environment "dev"
 ```
 
 **For Linux/macOS users:**
 ```bash
 # Run the bootstrap script
-./bootstrap-linux.sh -a 123456789012 -p my-project -e dev
+./scripts/bootstrap-linux.sh -a 123456789012 -p my-project -e dev
 ```
 
 **Or use Make (cross-platform):**
@@ -51,13 +80,15 @@ The scripts will:
 If you prefer manual setup:
 
 1. **Choose your setup type:**
-   - `examples/single-account-setup/` - For both GitHub Actions + local development
+   - `examples/github-and-local-access/` - For both GitHub Actions + local development
    - `examples/github-oidc-setup/` - For GitHub Actions only
 
 2. **Configure terraform.tfvars:**
    ```bash
-   cd examples/single-account-setup  # or github-oidc-setup
-   # Edit terraform.tfvars with your AWS account details
+   cd examples/simple-role-setup      # For basic roles without GitHub
+   cd examples/github-oidc-setup      # For GitHub Actions integration
+   cd examples/github-and-local-access   # For combined setup
+   # Edit terraform.tfvars with your account details
    ```
 
 3. **Deploy with admin access:**
@@ -75,16 +106,17 @@ Update `terraform.tfvars` in your chosen example:
 
 ```hcl
 # AWS Configuration
-aws_account_id = "123456789012"    # Your AWS Account ID
-project_name   = "my-project"      # Your project name
-environment    = "dev"             # Environment (dev/staging/prod)
+aws_account_id   = "123456789012"    # Your AWS Account ID
+project_name     = "my-project"      # Your project name  
+environment      = "dev"             # Environment (dev/staging/prod)
+role_name_prefix = "Deploy"          # Role name prefix (Deploy/CI/App/etc.)
 
-# For GitHub Actions
+# For GitHub Actions (github-oidc-setup only)
 github_org      = "your-github-org"
-github_repo     = "your-repo-name"
+github_repo     = "your-repo-name" 
 github_branches = ["main", "develop"]
 
-# For local development (optional)
+# For local development (all examples)
 trusted_aws_principals = [
   "arn:aws:iam::123456789012:user/your-username"
 ]
@@ -96,16 +128,18 @@ trusted_aws_principals = [
 
 ```hcl
 # Custom policy with only needed permissions
-terraform_custom_policy_json = jsonencode({
+```hcl
+# Option 1: Custom inline policy (recommended)
+custom_policy_json = jsonencode({
   Version = "2012-10-17"
   Statement = [
     {
       Effect = "Allow"
       Action = [
         "ec2:*",
-        "s3:*",
+        "s3:*", 
         "iam:CreateRole",
-        "iam:DeleteRole",
+        "iam:DeleteRole", 
         "iam:GetRole",
         "iam:PassRole"
       ]
@@ -113,26 +147,45 @@ terraform_custom_policy_json = jsonencode({
     }
   ]
 })
+
+# Option 2: Managed policies
+deployment_role_policies = [
+  "arn:aws:iam::aws:policy/PowerUserAccess",
+  "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
+]
 ```
 
 **Start with basic permissions and add more as needed.** See the pre-configured examples in `terraform.tfvars`.
 
-## � Repository Structure
+## 📁 Repository Structure
 
 ```
 terraform-aws-bootstrap-role/
-├── bootstrap-windows.ps1      # 🎯 Windows automated bootstrap script
-├── bootstrap-linux.sh         # 🎯 Linux/macOS automated bootstrap script  
 ├── Makefile                   # Cross-platform make commands
-├── README.md                  # This file
+├── README.md                  # Main documentation
+│
+├── scripts/                   # 🎯 Automation scripts
+│   ├── bootstrap-windows.ps1  # Windows automated bootstrap
+│   ├── bootstrap-linux.sh     # Linux/macOS automated bootstrap
+│   └── get-role-info.ps1      # Role information utility
+│
+├── docs/                      # 📚 Documentation
+│   ├── BOOTSTRAP-PROCESS.md   # Bootstrap process details
+│   ├── GETTING-STARTED.md     # Quick start guide
+│   └── POLICY-MANAGEMENT.md   # Security policy examples
 │
 ├── modules/iam-bootstrap/     # Core Terraform module
 │   ├── main.tf               # IAM roles and policies
-│   ├── variables.tf          # Configuration options
+│   ├── variables.tf          # Configuration options with role_name_prefix
 │   └── outputs.tf            # Role ARNs and setup info
 │
 └── examples/
-    ├── single-account-setup/     # GitHub + Local development
+    ├── simple-role-setup/        # Basic roles without GitHub OIDC
+    │   ├── main.tf
+    │   ├── variables.tf
+    │   └── terraform.tfvars      # 📝 Configuration template
+    │
+    ├── github-and-local-access/  # GitHub + Local development
     │   ├── main.tf
     │   ├── variables.tf
     │   └── terraform.tfvars      # 📝 Configuration template
@@ -166,7 +219,7 @@ jobs:
     - name: Configure AWS
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::ACCOUNT:role/PROJECT-TerraformExecutorRole-ENV
+        role-to-assume: arn:aws:iam::ACCOUNT:role/PROJECT-DeployExecutorRole-ENV
         aws-region: us-east-1
     
     - name: Setup Terraform
@@ -183,7 +236,7 @@ jobs:
 
 ```powershell
 # Configure AWS CLI to use the bootstrap roles
-aws configure set role_arn "arn:aws:iam::ACCOUNT:role/PROJECT-TerraformExecutorRole-ENV" --profile terraform-executor
+aws configure set role_arn "arn:aws:iam::ACCOUNT:role/PROJECT-DeployExecutorRole-ENV" --profile terraform-executor
 aws configure set source_profile your-admin-profile --profile terraform-executor
 
 # Use for Terraform operations
@@ -252,7 +305,7 @@ Example policy evolution:
 To remove all created resources:
 
 ```bash
-cd examples/single-account-setup  # or github-oidc-setup
+cd examples/github-and-local-access  # or github-oidc-setup
 terraform destroy
 ```
 
@@ -271,11 +324,11 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 📁 Documentation Structure
 
 - **`README.md`** (this file) - Complete project overview and reference
-- **`GETTING-STARTED.md`** - Step-by-step setup guide for first-time users
-- **`POLICY-MANAGEMENT.md`** - Guide for customizing IAM permissions
-- **`S3-STATE-BACKEND.md`** - Guide for S3 state storage setup and naming conventions
-- **`bootstrap-windows.ps1`** - Windows automated bootstrap script
-- **`bootstrap-linux.sh`** - Linux/macOS automated bootstrap script
+- **`docs/GETTING-STARTED.md`** - Step-by-step setup guide for first-time users
+- **`docs/POLICY-MANAGEMENT.md`** - Guide for customizing IAM permissions
+- **`docs/S3-STATE-BACKEND.md`** - Guide for S3 state storage setup and naming conventions
+- **`scripts/bootstrap-windows.ps1`** - Windows automated bootstrap script
+- **`scripts/bootstrap-linux.sh`** - Linux/macOS automated bootstrap script
 - **`Makefile`** - Cross-platform development commands
 - **`examples/*/terraform.tfvars`** - Configuration templates with examples
 ---

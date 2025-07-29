@@ -13,8 +13,15 @@ crash.*.log
 # password, private keys, and other secrets. These should not be part of version 
 # control as they are data points which are potentially sensitive and subject 
 # to change depending on the environment.
+#
+# NOTE: Current terraform.tfvars files are included as reference templates
+# After initial setup, you should run: git update-index --assume-unchanged examples/*/terraform.tfvars
+# to prevent accidentally committing secrets
 *.tfvars
 *.tfvars.json
+
+# Always include .tfvars.example files as reference templates
+!*.tfvars.example
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in

@@ -7,11 +7,11 @@ This example creates IAM roles specifically for **GitHub Actions** deployments v
 **Option 1: Use the automated script (Recommended)**
 ```powershell
 # From the root directory (Windows)
-.\bootstrap-windows.ps1 -AccountId "123456789012" -ProjectName "my-project" -Environment "prod"
+.\scripts\bootstrap-windows.ps1 -AccountId "123456789012" -ProjectName "my-project" -Environment "prod"
 # Select option 2 (github-oidc-setup)
 
 # From the root directory (Linux/macOS)  
-./bootstrap-linux.sh -a 123456789012 -p my-project -e prod
+./scripts/bootstrap-linux.sh -a 123456789012 -p my-project -e prod
 # Select option 2 (github-oidc-setup)
 ```
 

@@ -26,7 +26,7 @@ variable "github_branches" {
 }
 
 variable "trusted_aws_principals" {
-  description = "List of AWS principals (users/roles) that can assume the TerraformExecutorRole"
+  description = "List of AWS principals (users/roles) that can assume the ExecutorRole"
   type        = list(string)
   default     = []
 }
@@ -35,6 +35,12 @@ variable "project_name" {
   description = "Name of the project (used for resource naming)"
   type        = string
   default     = "terraform-bootstrap"
+}
+
+variable "role_name_prefix" {
+  description = "Prefix for IAM role names (e.g., 'Terraform', 'CI', 'Deploy')"
+  type        = string
+  default     = "Terraform"
 }
 
 variable "environment" {
@@ -49,20 +55,20 @@ variable "enable_github_oidc" {
   default     = true
 }
 
-variable "terraform_deployment_role_policies" {
-  description = "List of additional managed IAM policy ARNs to attach to TerraformDeploymentRole"
+variable "deployment_role_policies" {
+  description = "List of additional managed IAM policy ARNs to attach to DeploymentRole"
   type        = list(string)
   default     = []
 }
 
-variable "terraform_custom_policy_json" {
-  description = "Custom inline policy JSON for TerraformDeploymentRole. If provided, this will be used instead of AdministratorAccess for more granular control."
+variable "custom_policy_json" {
+  description = "Custom inline policy JSON for DeploymentRole. If provided, this will be used instead of AdministratorAccess for more granular control."
   type        = string
   default     = ""
   
   validation {
-    condition = var.terraform_custom_policy_json == "" || can(jsondecode(var.terraform_custom_policy_json))
-    error_message = "The terraform_custom_policy_json must be valid JSON when provided."
+    condition = var.custom_policy_json == "" || can(jsondecode(var.custom_policy_json))
+    error_message = "The custom_policy_json must be valid JSON when provided."
   }
 }
 
